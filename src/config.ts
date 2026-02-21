@@ -37,6 +37,14 @@ export class AppConfig {
   @IsNotEmpty()
   dbPath: string = "media.db";
 
+  /** Maximum upload file size in bytes (default 10 MB). */
+  @IsNumber()
+  maxFileSizeBytes: number = 10 * 1024 * 1024;
+
+  /** Per-request timeout in milliseconds (default 30 s). */
+  @IsNumber()
+  requestTimeoutMs: number = 30_000;
+
   get isProduction(): boolean {
     return this.nodeEnv === "production";
   }
@@ -52,6 +60,9 @@ export function loadConfig(): AppConfig {
     awsAccessKeyId: process.env.AWS_ACCESS_KEY_ID,
     awsSecretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
     dbPath: process.env.DB_PATH || "media.db",
+    maxFileSizeBytes:
+      Number(process.env.MAX_FILE_SIZE_BYTES) || 10 * 1024 * 1024,
+    requestTimeoutMs: Number(process.env.REQUEST_TIMEOUT_MS) || 30_000,
   };
 
   const config = plainToInstance(AppConfig, raw);
