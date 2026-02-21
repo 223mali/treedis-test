@@ -22,17 +22,54 @@ function bootstrap(): void {
   const logger = new Logger(config);
   const router = new Router(logger);
   const s3Service = new S3Service(logger, config);
-  const fileValidator = new FileValidator(logger);
+  const fileValidator = new FileValidator(logger, config);
   const metadataStore = new MetadataStore(logger, config);
 
   // -- Controllers (self-register routes via constructor) --
   new HealthController(logger, router);
-  new MediaController(logger, router, s3Service, fileValidator, metadataStore);
+  new MediaController(
+    logger,
+    router,
+    s3Service,
+    fileValidator,
+    metadataStore,
+    config,
+  );
   new SwaggerController(logger, router);
 
   // -- Start server --
-  const server = new HttpServer(router, logger, config.port);
+  const server = new HttpServer(
+    router,
+    logger,
+    config.port,
+    config.requestTimeoutMs,
+  );
   server.start();
+
+  // ── Graceful shutdown ───────────────────────────────────────────────
+  const shutdown = async (signal: string) => {
+    logger.info(`Received ${signal} — shutting down…`);
+    try {
+      await server.stop();
+      metadataStore.close();
+    } catch (err) {
+      logger.error(`Shutdown error: ${err}`);
+    }
+    process.exit(0);
+  };
+
+  process.on("SIGINT", () => shutdown("SIGINT"));
+  process.on("SIGTERM", () => shutdown("SIGTERM"));
+
+  // ── Last-resort error handlers ──────────────────────────────────────
+  process.on("uncaughtException", (err) => {
+    logger.error(`Uncaught exception: ${err.stack || err.message}`);
+    process.exit(1);
+  });
+
+  process.on("unhandledRejection", (reason) => {
+    logger.error(`Unhandled rejection: ${reason}`);
+  });
 }
 
 bootstrap();
