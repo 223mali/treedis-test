@@ -124,7 +124,10 @@ describe("FileValidator", () => {
     });
 
     it("should respect a custom maxFileSizeBytes config", () => {
-      const smallLimit = new FileValidator(mockLogger, makeConfig({ maxFileSizeBytes: 500 }));
+      const smallLimit = new FileValidator(
+        mockLogger,
+        makeConfig({ maxFileSizeBytes: 500 }),
+      );
       const file = makeFile(JPEG_HEADER, 501);
 
       expect(() =>
@@ -245,7 +248,9 @@ describe("FileValidator", () => {
     });
 
     it("should be case-insensitive for extensions", () => {
-      expect(validator.getMimeTypeFromExtension("PHOTO.JPG")).toBe("image/jpeg");
+      expect(validator.getMimeTypeFromExtension("PHOTO.JPG")).toBe(
+        "image/jpeg",
+      );
     });
 
     it("should return null for an unknown extension", () => {
@@ -257,7 +262,9 @@ describe("FileValidator", () => {
     });
 
     it("should use the last extension when multiple dots exist", () => {
-      expect(validator.getMimeTypeFromExtension("archive.tar.pdf")).toBe("application/pdf");
+      expect(validator.getMimeTypeFromExtension("archive.tar.pdf")).toBe(
+        "application/pdf",
+      );
     });
   });
 
