@@ -1,24 +1,25 @@
 import * as http from "http";
-import { URL } from "url";
+import FindMyWay, { HTTPMethod } from "find-my-way";
 import { Logger } from "./logger";
 
-type RouteHandler = (
+export type RouteHandler = (
   req: http.IncomingMessage,
   res: http.ServerResponse,
+  params: Record<string, string>,
 ) => void | Promise<void>;
 
-interface Route {
-  method: string;
-  path: string;
-  handler: RouteHandler;
-}
-
 export class Router {
-  private routes: Route[] = [];
+  private fmw: FindMyWay.Instance<FindMyWay.HTTPVersion.V1>;
   private logger: Logger;
 
   constructor(logger: Logger) {
     this.logger = logger;
+    this.fmw = FindMyWay({
+      defaultRoute: (_req, res) => {
+        res.writeHead(404, { "Content-Type": "application/json" });
+        res.end(JSON.stringify({ error: "Not Found" }));
+      },
+    });
   }
 
   public get(path: string, handler: RouteHandler): void {
@@ -37,35 +38,29 @@ export class Router {
     this.addRoute("DELETE", path, handler);
   }
 
-  private addRoute(method: string, path: string, handler: RouteHandler): void {
-    this.routes.push({ method, path, handler });
-    this.logger.info(`Registered route: ${method} ${path}`);
-  }
+  private addRoute(
+    method: HTTPMethod,
+    path: string,
+    handler: RouteHandler,
+  ): void {
+    this.fmw.on(method, path, (req, res, params) => {
+      const routeParams = (params || {}) as Record<string, string>;
 
-  public resolve(req: http.IncomingMessage, res: http.ServerResponse): void {
-    const url = new URL(req.url || "", `http://${req.headers.host}`);
-    const pathname = url.pathname;
-    const method = req.method || "GET";
+      this.logger.info(`${method} ${req.url}`);
 
-    this.logger.info(`${method} ${pathname}`);
-
-    const route = this.routes.find(
-      (r) => r.method === method && r.path === pathname,
-    );
-
-    if (route) {
-      Promise.resolve(route.handler(req, res)).catch((err) => {
-        this.logger.error(
-          `Unhandled error in route ${method} ${pathname}: ${err}`,
-        );
+      Promise.resolve(handler(req, res, routeParams)).catch((err) => {
+        this.logger.error(`Unhandled error in route ${method} ${path}: ${err}`);
         if (!res.writableEnded) {
           res.writeHead(500, { "Content-Type": "application/json" });
           res.end(JSON.stringify({ error: "Internal Server Error" }));
         }
       });
-    } else {
-      res.writeHead(404, { "Content-Type": "application/json" });
-      res.end(JSON.stringify({ error: "Not Found" }));
-    }
+    });
+
+    this.logger.info(`Registered route: ${method} ${path}`);
+  }
+
+  public resolve(req: http.IncomingMessage, res: http.ServerResponse): void {
+    this.fmw.lookup(req, res);
   }
 }

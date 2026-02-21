@@ -31,6 +31,7 @@
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.3",
     "dotenv": "^17.3.1",
+    "find-my-way": "^9.4.0",
     "pino": "^10.3.1",
     "reflect-metadata": "^0.2.2",
     "swagger-autogen": "^2.23.7",

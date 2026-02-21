@@ -28,9 +28,11 @@ export class SwaggerController {
   }
 
   private registerRoutes(router: Router): void {
-    router.get("/api-docs", (req, res) => this.serveSwaggerUI(req, res));
-    router.get("/api-docs/swagger.json", (req, res) =>
-      this.serveSpec(req, res),
+    router.get("/api-docs", (_req, res, _params) =>
+      this.serveSwaggerUI(_req, res),
+    );
+    router.get("/api-docs/swagger.json", (_req, res, _params) =>
+      this.serveSpec(_req, res),
     );
   }
 

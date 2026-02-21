@@ -11,7 +11,7 @@ export class HealthController {
   }
 
   private registerRoutes(router: Router): void {
-    router.get("/health", (req, res) => this.getHealth(req, res));
+    router.get("/health", (req, res, _params) => this.getHealth(req, res));
   }
 
   private getHealth(
