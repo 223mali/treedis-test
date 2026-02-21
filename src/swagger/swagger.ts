@@ -14,6 +14,28 @@ const doc = {
     { name: "Health", description: "Health check endpoints" },
     { name: "Media", description: "Media management endpoints" },
   ],
+  components: {
+    schemas: {
+      FileMetadata: {
+        type: "object",
+        properties: {
+          id: {
+            type: "string",
+            format: "uuid",
+            example: "b3d7c1e0-1234-4abc-9def-567890abcdef",
+          },
+          originalName: { type: "string", example: "photo.jpg" },
+          mimeType: { type: "string", example: "image/jpeg" },
+          size: { type: "number", example: 102400 },
+          uploadedAt: {
+            type: "string",
+            format: "date-time",
+            example: "2026-02-21T08:00:00.000Z",
+          },
+        },
+      },
+    },
+  },
 };
 
 const outputFile = "./src/swagger/swagger-output.json";
