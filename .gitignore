@@ -2,5 +2,9 @@
 *.db
 *.db-wal
 *.db-shm
-# ./src/swagger/swagger-output.json
+**/swagger-output.json
 **/node_modules/**
+**/dist/**
+**/build/**
+**/coverage/**
+**/.vscode/**
