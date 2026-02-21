@@ -51,7 +51,6 @@ export class S3Service {
     try {
       await this.client.send(new PutObjectCommand(params));
     } catch (err) {
-      console.log("🚀 ~ S3Service ~ download ~ err:", err);
       throw this.mapS3Error(err, "upload", key);
     }
 

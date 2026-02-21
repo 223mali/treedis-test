@@ -46,7 +46,6 @@ export class Router {
   ): void {
     this.fmw.on(method, path, (req, res, params) => {
       const routeParams = (params || {}) as Record<string, string>;
-      console.log("🚀 ~ Router ~ addRoute ~ routeParams:", routeParams);
 
       this.logger.info(`${method} ${req.url} XXX`);
 
